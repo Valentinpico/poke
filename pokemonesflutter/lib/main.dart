@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import './screens/Login/Login.dart';
 import './screens/Register/Register.dart';
 import './screens/Home/Home.dart';
+import './screens/Favoritos/FavoritosPage.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/home': (context) => HomePage(),
+        '/favorites': (context) => const FavoritePage(),
       },
     );
   }

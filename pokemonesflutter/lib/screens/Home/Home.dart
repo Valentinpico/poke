@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:pokemonesflutter/screens/Favoritos/FavoritosPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../Api/PokemonApi.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -21,7 +23,11 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    fetchPokemon();
+    PokemonApi.fetchPokemon(randomNumber).then((data) {
+      setState(() {
+        pokemonList = data;
+      });
+    });
     getStoredUserId();
   }
 
@@ -29,68 +35,6 @@ class _HomePageState extends State<HomePage> {
     final prefs = await SharedPreferences.getInstance();
     userId = prefs.getString('userId') ?? '';
     token = prefs.getString('auth_token') ?? '';
-  }
-
-  Future<void> fetchPokemon() async {
-    final url = Uri.parse(
-        'https://pokeapi.co/api/v2/pokemon?offset=$randomNumber 0&limit=20');
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      List<dynamic> results = data['results'];
-
-      List<dynamic> detailedPokemonList = [];
-      for (var pokemon in results) {
-        final pokemonDetailsResponse =
-            await http.get(Uri.parse(pokemon['url']));
-        if (pokemonDetailsResponse.statusCode == 200) {
-          detailedPokemonList.add(json.decode(pokemonDetailsResponse.body));
-        }
-      }
-
-      setState(() {
-        pokemonList = detailedPokemonList;
-      });
-    }
-  }
-
-  Future<void> addPokemonFavoriteApi(pokemon) async {
-    final url = Uri.parse('http://192.168.0.121:3000/api/pokemon/');
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token'
-      },
-      body: jsonEncode({
-        'userId': userId,
-        'pokemonFront': {
-          'name': pokemon['name'],
-          'id': pokemon['id'],
-          'species': {'url': pokemon['species']['url']},
-          'evolution_chain':
-              'https://pokeapi.co/api/v2/evolution-chain/1/', // Agregar la cadena de evolución
-          'sprites': {
-            'front_default': pokemon['sprites']['front_default'],
-          },
-          'types': pokemon['types'],
-          'abilities': pokemon['abilities'],
-          'stats': pokemon['stats'],
-        },
-      }),
-    );
-    var data = json.decode(response.body);
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(data['message'])),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(data['error'] ?? 'Error al agregar a favoritos')),
-      );
-    }
   }
 
   Future<void> logout(BuildContext context) async {
@@ -107,8 +51,6 @@ class _HomePageState extends State<HomePage> {
 
     if (index == 0) {
       // Manejo para la página de inicio
-    } else if (index == 1) {
-      Navigator.pushNamed(context, '/favoritos');
     } else if (index == 2) {
       logout(context);
     }
@@ -118,18 +60,22 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Lista de Pokémon')),
-      bottomSheet: TextButton(
+      floatingActionButton: TextButton(
           style: TextButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 117, 172, 216),
-              textStyle: TextStyle(color: Color(0xFFFFFFFF)) // Color de fondo
-              ), // Estilo para el botón de cargar más
+            backgroundColor: Colors.deepOrange[400],
+          ), // Estilo para el botón de cargar más
           onPressed: () => {
                 setState(() {
                   randomNumber = Random().nextInt(100);
                 }),
-                fetchPokemon()
+                PokemonApi.fetchPokemon(randomNumber).then((data) {
+                  setState(() {
+                    pokemonList = data;
+                  });
+                })
               },
-          child: const Text('Cargar más')),
+          child: const Text('Cargar más aleatoriamente',
+              style: TextStyle(color: Colors.white))),
       body: _selectedIndex == 0
           ? pokemonList.isEmpty
               ? const Center(child: CircularProgressIndicator())
@@ -214,9 +160,20 @@ class _HomePageState extends State<HomePage> {
                                   // Botón para agregar a favoritos
                                   TextButton(
                                     onPressed: () {
-                                      addPokemonFavoriteApi(pokemon);
+                                      PokemonApi.addPokemonFavoriteApi(
+                                              pokemon, token, userId)
+                                          .then((message) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(message)));
+                                      });
                                     },
-                                    child: const Text('Agregar a favoritos'),
+                                    style: TextButton.styleFrom(
+                                      backgroundColor: const Color.fromARGB(
+                                          255, 117, 172, 216),
+                                    ),
+                                    child: const Text('Agregar a favoritos',
+                                        style: TextStyle(color: Colors.white)),
                                   ),
                                 ],
                               ),
@@ -227,16 +184,16 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 )
-          : Container(),
+          : FavoritePage(),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Inicio',
+            label: 'home',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
-            label: 'Favoritos',
+            label: 'favorites',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.logout),
