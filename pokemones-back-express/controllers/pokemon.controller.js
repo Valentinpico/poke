@@ -2,6 +2,7 @@ import Pokemon from "../models/pokemon.model.js";
 import axios from "axios";
 export const addFavoritePokemon = async (req, res) => {
   const { userId, pokemonFront } = req.body;
+  console.log(req.body);
 
   try {
     let pokemon = await Pokemon.findOne({
@@ -9,17 +10,17 @@ export const addFavoritePokemon = async (req, res) => {
       userId: userId,
     });
     const chainEvolutionExist = await Pokemon.findOne({
-      chainEvolution: pokemonFront.evolution_chain.url,
+      chainEvolution: pokemonFront.evolution_chain,
       userId: userId,
     });
 
     if (pokemon) {
-      return res.status(400).json({ message: "Pokémon ya está en favoritos" });
+      return res.status(400).json({ error: "Pokémon ya está en favoritos" });
     }
 
     if (chainEvolutionExist) {
       return res.status(400).json({
-        message: `El Pokémon ya está en favoritos (pertenece a la misma cadena evolutiva que ${chainEvolutionExist.name}).`,
+        error: `El Pokémon ya está en favoritos (pertenece a la misma cadena evolutiva que ${chainEvolutionExist.name}).`,
       });
     }
 
@@ -65,7 +66,7 @@ export const addFavoritePokemon = async (req, res) => {
     }
 
     pokemon = new Pokemon({
-      id: pokemonData.id,
+      id: parseInt(pokemonData.id),
       userId: userId,
       name: pokemonData.name,
       image: pokemonData.sprites.front_default,
@@ -87,6 +88,7 @@ export const addFavoritePokemon = async (req, res) => {
 
     res.status(200).json({ message: "Pokémon agregado a favoritos", pokemon });
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({
       message: "Error al agregar el Pokémon a favoritos",
       error: error.message,

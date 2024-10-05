@@ -1,42 +1,47 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:jwt_decoder/jwt_decoder.dart';
 
-import '../../utils/Validators.dart';
+import 'package:pokemonesflutter/utils/Validators.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  // ignore: library_private_types_in_public_api
+  _RegisterPageState createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
+  final _nameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _nameController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _signIn() async {
+  Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+
     setState(() => _isLoading = true);
 
     final url = Uri.parse(
-        'http://192.168.0.121:3000/api/user/login'); // Cambia la URL a tu endpoint
+        'http://192.168.0.121:3000/api/user'); // Cambia la URL a tu endpoint
     final body = jsonEncode({
+      'name': _nameController.text.trim(),
       'email': _emailController.text.trim(),
       'password': _passwordController.text.trim(),
     });
@@ -49,24 +54,12 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       final data = jsonDecode(response.body);
-      if (response.statusCode == 200) {
-        final token = data['token'];
-        // decode tokem jwt y sacar el id del usuario
 
-        // guardar el id del usuario en shared preferences
-        final prefs = await SharedPreferences.getInstance();
-
-        await prefs.setString('auth_token', token);
-
-        final Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        final userId = decodedToken['userId'];
-        print(userId);
-        await prefs.setString('userId', userId);
-
+      if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data['message'])),
         );
-        Navigator.of(context).pushReplacementNamed('/home');
+        Navigator.of(context).pushReplacementNamed('/login');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data['message'])),
@@ -86,13 +79,22 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('Inicio de sesión')),
+        appBar: AppBar(title: const Text('Registro')),
         body: Form(
           key: _formKey,
           child: ListView(
             padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
             children: [
-              const Text('Ingresa con tu email y contraseña'),
+              const Text('Ingresa sus datos para registrarse'),
+              const SizedBox(height: 18),
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) => Validators.validateName(value),
+              ),
               const SizedBox(height: 18),
               TextFormField(
                 controller: _emailController,
@@ -113,18 +115,20 @@ class _LoginPageState extends State<LoginPage> {
                 validator: (value) => Validators.validatePassword(value),
               ),
               const SizedBox(height: 18),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _signIn,
-                child: Text(_isLoading ? 'Cargando' : 'Iniciar Sesión'),
+              TextFormField(
+                controller: _confirmPasswordController,
+                decoration: const InputDecoration(
+                  labelText: 'Verificar Contraseña',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+                validator: (value) => Validators.validateConfirmPassword(
+                    value, _passwordController.text),
               ),
               const SizedBox(height: 18),
-              TextButton(
-                onPressed: () {
-                  _emailController.clear();
-                  _passwordController.clear();
-                  Navigator.pushNamed(context, '/register');
-                },
-                child: const Text('¿No tienes cuenta? Regístrate'),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _signUp,
+                child: Text(_isLoading ? 'Cargando' : 'Registrarse'),
               ),
             ],
           ),
