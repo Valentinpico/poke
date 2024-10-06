@@ -52,7 +52,6 @@ class _HomePageState extends State<HomePage> {
     });
 
     if (index == 0) {
-
       PokemonApi.fetchPokemon(randomNumber).then((data) {
         setState(() {
           pokemonList = data;
@@ -82,7 +81,7 @@ class _HomePageState extends State<HomePage> {
       randomNumber = Random().nextInt(29);
     });
     pokemonList.clear();
-    print(randomNumber) ;
+    print(randomNumber);
     PokemonApi.fetchPokemon(randomNumber).then((data) {
       setState(() {
         pokemonList = data;
@@ -213,8 +212,7 @@ class _HomePageState extends State<HomePage> {
               token: token,
               userId: userId,
               isLoading: _isLoading,
-              onItemTapped: _onItemTapped
-              ),
+              onItemTapped: _onItemTapped),
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           const BottomNavigationBarItem(
