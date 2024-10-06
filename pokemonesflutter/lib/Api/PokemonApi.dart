@@ -5,7 +5,7 @@ import './UriIP.dart';
 class PokemonApi {
   static Future<List<dynamic>> fetchPokemon(randomNumber) async {
     final url = Uri.parse(
-        'https://pokeapi.co/api/v2/pokemon?offset=$randomNumber 0&limit=20');
+        'https://pokeapi.co/api/v2/pokemon?offset=${randomNumber}0&limit=20');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -34,7 +34,7 @@ class PokemonApi {
   }
 
   static Future<List<dynamic>> fetchPokemonFavorites(token, userId) async {
-    final url = Uri.parse('${URIP.uri}/$userId');
+    final url = Uri.parse('${URIP.uri}/pokemon/$userId');
     final response = await http.get(url, headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token'
@@ -47,7 +47,7 @@ class PokemonApi {
   }
 
   static Future<String> addPokemonFavoriteApi(pokemon, token, userId) async {
-    final url = Uri.parse('${URIP.uri}/');
+    final url = Uri.parse('${URIP.uri}/pokemon/');
     final response = await http.post(
       url,
       headers: {
@@ -60,8 +60,7 @@ class PokemonApi {
           'name': pokemon['name'],
           'id': pokemon['id'],
           'species': {'url': pokemon['species']['url']},
-          'evolution_chain':
-              pokemon['evolution_chain'], // Agregar la cadena de evolución
+          'evolution_chain': pokemon['evolution_chain'],
           'sprites': {
             'front_default': pokemon['sprites']['front_default'],
           },
@@ -77,7 +76,50 @@ class PokemonApi {
       return data['message'];
     }
 
+    print(data);
+
     return data['error'] ??
+        data['message'] ??
         'Ocurrió un error al agregar el pokémon a favoritos';
+  }
+
+  static Future<String> deletePokemonFavoriteApi(pokemon, token) async {
+    final url = Uri.parse('${URIP.uri}/pokemon/$pokemon');
+    final response = await http.delete(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
+    );
+    var data = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return data['message'];
+    }
+
+    return data['message'] ??
+        'Ocurrió un error al eliminar el pokémon de favoritos';
+  }
+
+  static Future<String> evolutionPokemon(pokemon, token, userId) async {
+    final url = Uri.parse('${URIP.uri}/pokemon/$userId/${pokemon['id']}');
+    final response = await http.put(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
+    );
+    var data = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      return data['message'];
+    }
+
+    print(data);
+
+    return data['message'] ??
+        'Ocurrió un error al obtener la evolución del pokémon';
   }
 }

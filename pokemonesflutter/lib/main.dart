@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import './screens/Login/Login.dart';
-import './screens/Register/Register.dart';
-import './screens/Home/Home.dart';
-import './screens/Favoritos/FavoritosPage.dart';
+import 'screens/Login/login.dart';
+import 'screens/Register/register.dart';
+import 'screens/Home/home.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,13 +14,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Debug print
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'App Pokémon',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white),
+          bodySmall: TextStyle(color: Colors.white),
+          headlineMedium: TextStyle(color: Colors.white),
+          labelLarge: TextStyle(color: Colors.white),
+        ),
+        scaffoldBackgroundColor: Colors.black,
+        canvasColor: Colors.blueGrey[400],
         useMaterial3: true,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.blueGrey[400],
+        ),
       ),
       home: FutureBuilder<String?>(
         future: SharedPreferences.getInstance().then((prefs) {
@@ -36,7 +45,6 @@ class MyApp extends StatelessWidget {
                 body: Center(child: Text('Error al obtener el token')));
           }
           final token = snapshot.data;
-          print('Token: $token'); // Debug print
           return token != null ? HomePage() : const LoginPage();
         },
       ),
@@ -44,7 +52,6 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/home': (context) => HomePage(),
-        '/favorites': (context) => const FavoritePage(),
       },
     );
   }

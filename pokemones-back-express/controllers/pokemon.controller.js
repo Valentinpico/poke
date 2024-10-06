@@ -2,7 +2,6 @@ import Pokemon from "../models/pokemon.model.js";
 import axios from "axios";
 export const addFavoritePokemon = async (req, res) => {
   const { userId, pokemonFront } = req.body;
-  console.log(req.body);
 
   try {
     let pokemon = await Pokemon.findOne({
@@ -88,7 +87,6 @@ export const addFavoritePokemon = async (req, res) => {
 
     res.status(200).json({ message: "Pokémon agregado a favoritos", pokemon });
   } catch (error) {
-    console.log(error.message);
     res.status(500).json({
       message: "Error al agregar el Pokémon a favoritos",
       error: error.message,
@@ -101,7 +99,7 @@ export const getFavoritePokemons = async (req, res) => {
 
   try {
     const pokemons = await Pokemon.find({ userId }).select(
-      "name image types abilities stats evolutions"
+      "id name image types abilities stats evolutions"
     );
 
     if (!pokemons.length) {
@@ -137,6 +135,7 @@ export const evolvePokemon = async (req, res) => {
     if (evolutions[evolutions.length - 1].id === pokemon.id) {
       return res.status(404).json({ message: "Ya no puede evolucionar" });
     }
+    
 
     let index = evolutions.findIndex((evo) => evo.id === pokemon.id);
 
@@ -168,7 +167,10 @@ export const evolvePokemon = async (req, res) => {
 
     res.status(200).json({ message: "Pokémon evolucionado", pokemon });
   } catch (error) {
-    res.status(500).json({ message: "Error al evolucionar el Pokémon", error });
+    res.status(500).json({
+      message: "Error al evolucionar el Pokémon",
+      error: error.message,
+    });
   }
 };
 

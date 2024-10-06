@@ -1,12 +1,11 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import '../../Api/UriIP.dart';
 
-import '../../utils/Validators.dart';
+import '../../utils/validators.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -34,8 +33,7 @@ class _LoginPageState extends State<LoginPage> {
     }
     setState(() => _isLoading = true);
 
-    final url = Uri.parse(
-        'http://192.168.0.121:3000/api/user/login'); // Cambia la URL a tu endpoint
+    final url = Uri.parse('${URIP.uri}/user/login');
     final body = jsonEncode({
       'email': _emailController.text.trim(),
       'password': _passwordController.text.trim(),
@@ -51,16 +49,13 @@ class _LoginPageState extends State<LoginPage> {
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         final token = data['token'];
-        // decode tokem jwt y sacar el id del usuario
 
-        // guardar el id del usuario en shared preferences
         final prefs = await SharedPreferences.getInstance();
 
         await prefs.setString('auth_token', token);
 
         final Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
         final userId = decodedToken['userId'];
-        print(userId);
         await prefs.setString('userId', userId);
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -86,13 +81,20 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('Inicio de sesión')),
+        appBar: AppBar(
+          title: const Text(
+            'Inicio de sesión',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.black,
+        ),
         body: Form(
           key: _formKey,
           child: ListView(
             padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
             children: [
-              const Text('Ingresa con tu email y contraseña'),
+              const Text('Ingresa con tu email y contraseña',
+                  style: TextStyle(color: Colors.white)),
               const SizedBox(height: 18),
               TextFormField(
                 controller: _emailController,

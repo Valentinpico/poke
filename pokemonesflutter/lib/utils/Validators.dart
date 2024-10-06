@@ -1,7 +1,4 @@
-import 'package:flutter/material.dart';
-
 class Validators {
-  // Validación para email
   static String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Por favor ingresa tu email';
@@ -13,7 +10,6 @@ class Validators {
     return null;
   }
 
-  // Validación para nombre
   static String? validateName(String? value) {
     if (value == null || value.isEmpty) {
       return 'Por favor ingresa tu nombre';
@@ -21,7 +17,6 @@ class Validators {
     return null;
   }
 
-  // Validación para contraseña
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Por favor ingresa tu contraseña';
@@ -31,7 +26,6 @@ class Validators {
     return null;
   }
 
-  // Validación para verificar contraseña
   static String? validateConfirmPassword(String? value, String password) {
     if (value == null || value.isEmpty) {
       return 'Por favor confirma tu contraseña';

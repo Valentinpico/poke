@@ -1,16 +1,14 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:pokemonesflutter/Api/UriIP.dart';
 import 'dart:convert';
 
-import 'package:pokemonesflutter/utils/Validators.dart';
+import 'package:pokemonesflutter/utils/validators.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _RegisterPageState createState() => _RegisterPageState();
 }
 
@@ -38,8 +36,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     setState(() => _isLoading = true);
 
-    final url = Uri.parse(
-        'http://192.168.0.121:3000/api/user'); // Cambia la URL a tu endpoint
+    final url = Uri.parse('${URIP.uri}/user');
     final body = jsonEncode({
       'name': _nameController.text.trim(),
       'email': _emailController.text.trim(),
