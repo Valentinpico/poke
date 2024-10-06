@@ -18,3 +18,6 @@ Asimismo, la documentación del **backend** está disponible aquí:
 - [Documentación del Backend (Express)](https://github.com/Valentinpico/poke/tree/master/pokemones-back-express)
 
 En estas documentaciones se detallan las formas en las que trabajan cada una de ellas.
+
+Video de demostracion de la app:
+- [Demostración de la app (Youtube)](https://www.youtube.com/watch?v=74m11RFTFbM)
